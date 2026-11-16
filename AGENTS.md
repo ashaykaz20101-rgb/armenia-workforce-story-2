@@ -28,3 +28,12 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Slides architecture
+- Slides are React components registered in `src/slides/deck.ts`; add new slides there so the viewer, grid and `/print` PDF pick them up automatically.
+- Every slide wraps `SlideLayout` (the master: tone, footer credit, page number) — never hand-roll a footer on a slide.
+- Slides render at 1920x1080 via `ScaledSlide`; thumbnails and `/print` use static mode (`.slide-static`) so animations never freeze mid-state in previews or PDF.
+- Fade half-bleed photos with mask utilities or `--slide-bg`-based edge gradients so fades always match the slide's tone.
+- Audience voting: options, percentage math and DB calls live in `src/lib/poll.ts`; votes go to `poll_votes` (anon insert only) and results are read via the `get_poll_results` security-definer function, so voter rows are never publicly readable.
+- The vote QR encodes the published site URL (`PUBLIC_SITE_URL` in `src/lib/poll.ts`), never `window.location`, because preview links require sign-in; update it if the domain changes.
+- The title slide's talking presenter is a CDN video (`presenter-intro.mp4.asset.json`) with its first frame as the poster; static mode shows only the poster.
